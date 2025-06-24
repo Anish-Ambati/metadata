@@ -5,22 +5,19 @@ import nltk
 from nltk.corpus import stopwords
 from collections import Counter
 import spacy
+import os
+from datetime import datetime
 
-# Download NLTK data if not already downloaded
-try:
-    nltk.data.find('tokenizers/punkt')
-except LookupError:
-    nltk.download('punkt')
-try:
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('stopwords')
+# Set NLTK data path to project directory
+project_dir = os.path.dirname(os.path.abspath(__file__))
+nltk_data_dir = os.path.join(project_dir, 'nltk_data')
+nltk.data.path.append(nltk_data_dir)
 
 # Load spaCy model
 try:
     nlp = spacy.load("en_core_web_sm")
 except OSError:
-    st.error("Please download the spaCy model by running: python -m spacy download en_core_web_sm")
+    st.error("SpaCy model 'en_core_web_sm' not found. Ensure it is installed via requirements.txt.")
     st.stop()
 
 # Text and metadata extraction functions
@@ -98,8 +95,8 @@ if uploaded_file is not None:
         "filename": file_name,
         "file_type": file_type,
         "size": file_size,
-        "creation_date": str(creation_date) if creation_date else None,
-        "modification_date": str(modification_date) if modification_date else None,
+        "creation_date": creation_date.isoformat() if isinstance(creation_date, datetime) else creation_date,
+        "modification_date": modification_date.isoformat() if isinstance(modification_date, datetime) else modification_date,
         "keywords": keywords,
         "entities": entities,
         "word_count": word_count,
