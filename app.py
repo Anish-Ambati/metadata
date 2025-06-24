@@ -1,3 +1,4 @@
+
 import streamlit as st
 import os
 import json
@@ -10,22 +11,25 @@ import spacy
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import NMF
 
-# Load the spaCy English model
-# This part might need adjustment for deployment environments.
-# For Colab/development, downloading here is fine.
-# For production, ensure the model is included in your deployment package.
+# Load the spaCy English model from local path
+# Ensure the 'spacy_models/en_core_web_sm' directory
+# containing the model files is in your repository.
 try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    st.warning("Downloading en_core_web_sm spaCy model. This may take a moment.")
-    # Use os.system for shell command in this context
-    os.system("python -m spacy download en_core_web_sm")
-    nlp = spacy.load("en_core_web_sm")
+    # Use the relative path to the model directory within your repo
+    model_path = "./spacy_models/en_core_web_sm"
+    if not os.path.exists(model_path):
+         st.error(f"Error: spaCy model not found at {model_path}. Make sure the 'spacy_models/en_core_web_sm' directory is in your repository.")
+         st.stop() # Stop the Streamlit app if model is not found
+    nlp = spacy.load(model_path)
+    st.success("spaCy model loaded successfully!")
+except Exception as e:
+    st.error(f"Error loading spaCy model: {e}")
+    st.stop() # Stop the Streamlit app if loading fails
 
 
 # Document Extraction Functions (from previous steps)
 def extract_text_from_pdf(pdf_path):
-    """Extracts text content from a PDF file."""
+    \"\"\"Extracts text content from a PDF file.\"\"\"
     text = ""
     try:
         with open(pdf_path, 'rb') as file:
@@ -34,37 +38,37 @@ def extract_text_from_pdf(pdf_path):
                 page = reader.pages[page_num]
                 text += page.extract_text() or "" # Handle potential None return from extract_text
     except FileNotFoundError:
-        return f"Error: PDF file not found at {pdf_path}"
+        return f"Error: PDF file not found at {{pdf_path}}"
     except Exception as e:
-        return f"Error extracting text from PDF: {e}"
+        return f"Error extracting text from PDF: {{e}}"
     return text
 
 def extract_text_from_docx(docx_path):
-    """Extracts text content from a DOCX file."""
+    \"\"\"Extracts text content from a DOCX file.\"\"\"
     text = ""
     try:
         doc = docx.Document(docx_path)
         for paragraph in doc.paragraphs:
             text += paragraph.text + "\\n" # Use double backslash for newline in string literal
     except FileNotFoundError:
-        return f"Error: DOCX file not found at {docx_path}"
+        return f"Error: DOCX file not found at {{docx_path}}"
     except Exception as e:
-        return f"Error extracting text from DOCX: {e}"
+        return f"Error extracting text from DOCX: {{e}}"
     return text
 
 def extract_text_from_txt(txt_path):
-    """Extracts text content from a TXT file."""
+    \"\"\"Extracts text content from a TXT file.\"\"\"
     try:
         with open(txt_path, 'r', encoding='utf-8') as file:
             text = file.read()
     except FileNotFoundError:
-        return f"Error: TXT file not found at {txt_path}"
+        return f"Error: TXT file not found at {{txt_path}}"
     except Exception as e:
-        return f"Error extracting text from TXT: {e}"
+        return f"Error extracting text from TXT: {{e}}"
     return text
 
 def perform_ocr_on_image(image_input):
-    """Performs OCR on an image (file path or PIL Image object)."""
+    \"\"\"Performs OCR on an image (file path or PIL Image object).\"\"\"
     try:
         if isinstance(image_input, str):
             img = Image.open(image_input)
@@ -76,15 +80,15 @@ def perform_ocr_on_image(image_input):
         text = pytesseract.image_to_string(img)
         return text
     except FileNotFoundError:
-        return f"Error: Image file not found for OCR at {image_input}"
+        return f"Error: Image file not found for OCR at {{image_input}}"
     except Exception as e:
-        return f"Error performing OCR: {e}"
+        return f"Error performing OCR: {{e}}"
 
 
 def extract_document_text(file_path):
-    """Determines file type and extracts text using appropriate function."""
+    \"\"\"Determines file type and extracts text using appropriate function.\"\"\"
     if not os.path.exists(file_path):
-        return f"Error: File not found at {file_path}"
+        return f"Error: File not found at {{file_path}}"
 
     file_extension = os.path.splitext(file_path)[1].lower()
 
@@ -103,11 +107,11 @@ def extract_document_text(file_path):
     # elif file_extension in ['.png', '.jpg', '.jpeg', '.tiff']:
     #     return perform_ocr_on_image(file_path)
     else:
-        return f"Error: Unsupported file type: {file_extension}"
+        return f"Error: Unsupported file type: {{file_extension}}"
 
 # Semantic Content Identification Functions (from previous steps)
 def extract_entities(text):
-    """Extracts named entities from text using spaCy."""
+    \"\"\"Extracts named entities from text using spaCy.\"\"\"
     if not text:
         return []
     doc = nlp(text)
@@ -115,7 +119,7 @@ def extract_entities(text):
     return entities
 
 def extract_keywords(text):
-    """Extracts keywords from text based on noun chunks and named entities."""
+    \"\"\"Extracts keywords from text based on noun chunks and named entities.\"\"\"
     if not text:
         return []
     doc = nlp(text)
@@ -123,7 +127,7 @@ def extract_keywords(text):
     return list(set(keywords)) # Remove duplicates
 
 def perform_topic_modeling(text, num_topics=3, num_words=5):
-    """Performs basic topic modeling using TF-IDF and NMF."""
+    \"\"\"Performs basic topic modeling using TF-IDF and NMF.\"\"\"
     if not text or len(text.split()) < 10: # Basic check for sufficient text
         return "Insufficient text for topic modeling."
 
@@ -136,6 +140,7 @@ def perform_topic_modeling(text, num_topics=3, num_words=5):
         if n_components <= 0:
              return "Could not determine topics (insufficient features)."
 
+
         nmf_model = NMF(n_components=n_components, random_state=1, init='nndsvd')
         nmf_model.fit(tfidf)
 
@@ -144,11 +149,11 @@ def perform_topic_modeling(text, num_topics=3, num_words=5):
         for topic_idx, topic in enumerate(nmf_model.components_):
             top_words_indices = topic.argsort()[:-num_words - 1:-1]
             top_words = [feature_names[i] for i in top_words_indices]
-            topics[f"Topic {topic_idx+1}"] = top_words
+            topics[f"Topic {{topic_idx+1}}"] = top_words
         return topics
 
     except Exception as e:
-        return f"Error during topic modeling: {e}"
+        return f"Error during topic modeling: {{e}}"
 
 def analyze_document_semantics(text):
     """
@@ -162,18 +167,18 @@ def analyze_document_semantics(text):
         Returns an error message if analysis fails.
     """
     if not text:
-        return {"error": "No text provided for semantic analysis."}
+        return {{"error": "No text provided for semantic analysis."}}
 
-    results = {}
+    results = {{}}
     try:
         results["entities"] = extract_entities(text)
     except Exception as e:
-        results["entities"] = f"Error extracting entities: {e}"
+        results["entities"] = f"Error extracting entities: {{e}}"
 
     try:
         results["keywords"] = extract_keywords(text)
     except Exception as e:
-        results["keywords"] = f"Error extracting keywords: {e}"
+        results["keywords"] = f"Error extracting keywords: {{e}}"
 
     try:
         topic_modeling_result = perform_topic_modeling(text)
@@ -185,7 +190,7 @@ def analyze_document_semantics(text):
              results["topics"] = topic_modeling_result
 
     except Exception as e:
-        results["topics"] = f"Error performing topic modeling: {e}"
+        results["topics"] = f"Error performing topic modeling: {{e}}"
 
     return results
 
@@ -201,13 +206,13 @@ def generate_metadata(semantic_results):
     Returns:
         A dictionary containing structured metadata.
     """
-    metadata = {
+    metadata = {{
         'entities': semantic_results.get('entities', []),
         'keywords': semantic_results.get('keywords', []),
         'topics': semantic_results.get('topics', "Topic modeling results not available."),
         'summary': "Summary generation not yet implemented.",
         'categories': "Categorization not yet implemented."
-    }
+    }}
     return metadata
 
 
@@ -258,3 +263,4 @@ if st.button("Generate Metadata"):
 
     else:
         st.warning("Please upload a file first.")
+
