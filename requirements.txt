@@ -1,4 +1,4 @@
-requirements_content = """
+
 streamlit
 PyPDF2
 python-docx
@@ -7,6 +7,3 @@ Pillow
 spacy
 scikit-learn
 # Add other dependencies if necessary
-"""
-
-print(requirements_content)
