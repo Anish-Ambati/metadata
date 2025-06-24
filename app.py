@@ -1,3 +1,11 @@
+import nltk
+import os
+
+# Set the path to the nltk_data directory in the project
+project_dir = os.path.dirname(os.path.abspath(__file__))
+nltk_data_dir = os.path.join(project_dir, 'nltk_data')
+nltk.data.path.append(nltk_data_dir)
+
 import streamlit as st
 import PyPDF2
 import docx
