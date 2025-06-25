@@ -1,11 +1,23 @@
-import nltk
+import streamlit as st
 import os
 
-# Set the path to the nltk_data directory in the project
-project_dir = os.path.dirname(os.path.abspath(__file__))
+# Set NLTK data path (use a fallback if __file__ is not available)
+try:
+    project_dir = os.path.dirname(os.path.abspath(__file__))
+except NameError:
+    project_dir = os.getcwd()  # Fallback to current working directory in cloud
 nltk_data_dir = os.path.join(project_dir, 'nltk_data')
+import nltk
 nltk.data.path.append(nltk_data_dir)
 
+# Load spaCy model
+import spacy
+try:
+    nlp = spacy.load("en_core_web_sm")
+except OSError:
+    st.error("SpaCy model 'en_core_web_sm' not found. Ensure it is installed via requirements.txt.")
+    st.stop()
+    
 import streamlit as st
 import PyPDF2
 import docx
@@ -17,16 +29,16 @@ import os
 from datetime import datetime
 
 # Set NLTK data path to project directory
-project_dir = os.path.dirname(os.path.abspath(__file__))
-nltk_data_dir = os.path.join(project_dir, 'nltk_data')
-nltk.data.path.append(nltk_data_dir)
+#project_dir = os.path.dirname(os.path.abspath(__file__))
+#nltk_data_dir = os.path.join(project_dir, 'nltk_data')
+#nltk.data.path.append(nltk_data_dir)
 
 # Load spaCy model
-try:
-    nlp = spacy.load("en_core_web_sm")
-except OSError:
-    st.error("SpaCy model 'en_core_web_sm' not found. Ensure it is installed via requirements.txt.")
-    st.stop()
+#try:
+ #   nlp = spacy.load("en_core_web_sm")
+#except OSError:
+   # st.error("SpaCy model 'en_core_web_sm' not found. Ensure it is installed via requirements.txt.")
+  #  st.stop()
 
 # Text and metadata extraction functions
 def extract_text_and_metadata_pdf(file):
